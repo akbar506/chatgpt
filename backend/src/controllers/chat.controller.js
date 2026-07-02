@@ -9,11 +9,12 @@ async function createChat(req, res) {
     try {
         // Get the user object which we save in auth.middleware.js
         const user = req.user;
+        
         const chat = new chatModel({
             user: user._id,
             title
         })
-
+        await chat.save();
         res.status(200).json({
             success: true,
             message: "Chat successfully created",

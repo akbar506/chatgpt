@@ -15,7 +15,7 @@ const authUser = async (req, res, next) => {
         // Get the decoded object in jwt token
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         
-        const user = userModel.findById(decoded.id)
+        const user = await userModel.findById(decoded.userId)
         // Add user object in request object
         req.user = user
 
