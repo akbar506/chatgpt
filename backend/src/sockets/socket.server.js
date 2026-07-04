@@ -65,7 +65,6 @@ async function initSocketServer(httpServer) {
                     chat: messagePayload.chat,
                     user: socket.user._id, // AI messages don't have a user
                     content: aiResponse.content,
-                    thoughts: aiResponse.thoughts,
                     role: "model",
                     promptTokens: aiResponse.promptTokens,
                     completionTokens: aiResponse.completionTokens,
@@ -81,7 +80,6 @@ async function initSocketServer(httpServer) {
                 await userMessage.save();
 
                 socket.emit("ai-response", {
-                    thoughts: aiResponse.thoughts,
                     content: aiResponse.content,
                     chat: messagePayload.chat,
                     promptTokens: aiResponse.promptTokens,
