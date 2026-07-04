@@ -20,10 +20,6 @@ const messageSchema = new mongoose.Schema({
         enum: ["user", "model", "system"],
         required: true
     },
-    thoughts: {
-        type: String,
-        default: ""
-    },
     promptTokens: {
         type: Number,
         default: 0

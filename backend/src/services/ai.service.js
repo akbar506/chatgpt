@@ -1,10 +1,14 @@
 const { GoogleGenAI, ThinkingLevel } = require("@google/genai");
 
-const ai = new GoogleGenAI({});
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-const systemInstruction = `You are a helpful, knowledgeable, and reliable AI assistant.
+const systemInstructions = `You are a helpful, knowledgeable, and reliable AI assistant.
 
 Your primary goal is to provide accurate, useful, and well-structured responses while maintaining a natural conversational tone.
+If someone ask you to introduce yourself, you should say "About this Project:
+- This project is a chat application powered by Google Gemini 3.1 Flash Lite that allows users to interact with an AI assistant. The AI assistant is designed to provide helpful and informative responses based on the user's input. It is Powered by Google Gemini 3.1 Flash Lite.
+- This Project is made by Akbar Ali, It is a open-source project. Project source code is available on GitHub "https://github.com/akbar506/chatgpt" and his github profile is @akbar506"
+
 
 Guidelines:
 
@@ -31,45 +35,36 @@ Safety:
 
 Your goal is to be an intelligent, trustworthy, and practical assistant that helps users solve problems efficiently.`
 
-async function generateAIResponse(prompt, thinkingLevel = ThinkingLevel.HIGH) {
+async function generateAIResponse(contents, thinkingLevel = ThinkingLevel.HIGH) {
     // Map the string representation of thinking levels to the corresponding ThinkingLevel enum values
     const levelMap = {
         Minimal: ThinkingLevel.MINIMAL,
+        Low: ThinkingLevel.LOW,
+        Medium: ThinkingLevel.MEDIUM,
         High: ThinkingLevel.HIGH,
     };
 
-    const response = await ai.models.generateContent({
-        model: "gemma-4-31b-it",
-        config: {
-            thinkingConfig: {
-                thinkingLevel: levelMap[thinkingLevel] ?? ThinkingLevel.HIGH, // Set the thinking level based on the parameter
-            },
-            systemInstruction: [
-                {
-                    text: systemInstruction,
-                }
-            ],
+    const config = {
+        thinkingConfig: {
+            thinkingLevel: levelMap[thinkingLevel] ?? ThinkingLevel.HIGH, // Set the thinking level based on the parameter
         },
-        contents: prompt,
-    });
-
-    // Extract the thoughts and answer from the response
-    const parts = response.candidates[0].content.parts;
-
-    let thoughts = "";
-    let answer = "";
-
-    // Iterate through the parts and separate thoughts from the answer
-    for (const part of parts) {
-        if (part.thought) {
-            thoughts += part.text;
-        } else {
-            answer += part.text;
-        }
+        systemInstruction: [
+            {
+                text: systemInstructions,
+            }
+        ],
     }
 
+    const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite",
+        config,
+        contents,
+    });
+    
+    // Extract the answer from the response object
+    const answer = response.candidates[0].content.parts[0].text;
+
     return {
-        thoughts,
         content: answer,
         promptTokens: response.usageMetadata.promptTokenCount,
         completionTokens: response.usageMetadata.candidatesTokenCount,
