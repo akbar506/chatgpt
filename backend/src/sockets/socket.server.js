@@ -5,6 +5,7 @@ const userModel = require("../models/user.model");
 const messageModel = require("../models/message.model");
 const aiService = require("../services/ai.service");
 const chatModel = require("../models/chat.model");
+const vectorService = require("../services/vector.service")
 
 async function initSocketServer(httpServer) {
     const io = new Server(httpServer, {});
@@ -42,6 +43,31 @@ async function initSocketServer(httpServer) {
                 });
                 await userMessage.save();
 
+                // Generate embeddings for the user's message
+                const MessageVectors = await vectorService.generateEmbedding(messagePayload.content)
+                
+                // Query the vector database (Pinecone) for similar messages
+                const vectorMemory = await vectorService.queryVectorMemory({
+                    vector: MessageVectors[0].values,
+                    topK: 3,
+                    metadata: {
+                        userId: socket.user._id.toString(),
+                    }
+                })
+
+                // Save the generated embeddings to the vector database (Pinecone)
+                await vectorService.createVectorMemory({
+                    vector: MessageVectors[0].values,
+                    metadata: {
+                        userId: socket.user._id.toString(),
+                        chatId: messagePayload.chat,
+                        role: "user",
+                        content: messagePayload.content
+                    },
+                    messageId: userMessage._id.toString()
+                })
+
+
                 // Find the chat and update its lastActivity timestamp
                 const chat = await chatModel.findById(messagePayload.chat);
                 if (chat) {
@@ -72,6 +98,21 @@ async function initSocketServer(httpServer) {
                 })
 
                 await aiMessage.save();
+
+                // Generate embeddings for the AI's response
+                const aiMessageVectors = await vectorService.generateEmbedding(aiResponse.content)
+
+                // Save the generated embeddings for the AI's response to the vector database (Pinecone)
+                await vectorService.createVectorMemory({
+                    vector: aiMessageVectors[0].values,
+                    metadata: {
+                        userId: socket.user._id.toString(),
+                        chatId: messagePayload.chat,
+                        role: "model",
+                        content: aiResponse.content
+                    },
+                    messageId: aiMessage._id.toString()
+                })
 
                 // update the user message promptTokens
                 userMessage.promptTokens = aiResponse.promptTokens;
