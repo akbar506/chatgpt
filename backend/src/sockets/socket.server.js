@@ -77,13 +77,37 @@ async function initSocketServer(httpServer) {
                 // Find all messages with the same chat ID to get the conversation history
                 const history = (await messageModel.find({ chat: messagePayload.chat }).sort({ createdAt: -1 }).limit(20)).reverse();
 
-                // Generate AI response based on the conversation history
-                const aiResponse = await aiService.generateAIResponse(history.map((chat) => {
+                // Short term memory (STM) from the current chat messages
+                const stm = history.map((chat) => {
                     return {
                         role: chat.role,
                         parts: [{ text: chat.content }]
                     }
-                }), messagePayload.thinkingLevel);
+                });
+
+                // Long term memory (LTM) from the vector database (Pinecone)
+                const ltm = vectorMemory.map((chat) => {
+                    return {
+                        role: chat.metadata.role,
+                        parts: [{ text: chat.metadata.content }]
+                    }
+                });
+
+                const previousMessagesInstruction = {
+                    role: "user",
+                    parts: [{ text: "These are the previous messages in the conversation. Use them to provide context for your response if needed." }]
+                }
+
+                const currentChatMessagesInstruction = {
+                    role: "user",
+                    parts: [{ text: "These are the messages in the current chat. Use them to provide context for your response if needed." }]
+                }
+
+                // Combine all the chats and instructions
+                const combineMemory = [previousMessagesInstruction, ...ltm, currentChatMessagesInstruction, ...stm];
+                
+                // Generate AI response based on the conversation history
+                const aiResponse = await aiService.generateAIResponse(combineMemory, messagePayload.thinkingLevel);
 
                 // Save the AI's response to the database
                 const aiMessage = new messageModel({
