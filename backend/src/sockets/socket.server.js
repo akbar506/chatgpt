@@ -51,10 +51,10 @@ async function initSocketServer(httpServer) {
                     vector: MessageVectors[0].values,
                     topK: 3,
                     metadata: {
-                        userId: socket.user._id.toString(),
+                        userId: { "$eq": socket.user._id.toString() },
                     }
                 })
-
+                
                 // Save the generated embeddings to the vector database (Pinecone)
                 await vectorService.createVectorMemory({
                     vector: MessageVectors[0].values,
@@ -66,7 +66,6 @@ async function initSocketServer(httpServer) {
                     },
                     messageId: userMessage._id.toString()
                 })
-
 
                 // Find the chat and update its lastActivity timestamp
                 const chat = await chatModel.findById(messagePayload.chat);

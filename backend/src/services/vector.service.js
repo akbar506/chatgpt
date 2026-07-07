@@ -27,7 +27,7 @@ async function queryVectorMemory({ vector, topK = 5, metadata }) {
     const data = await chatgptIndex.query({
         vector,
         topK,
-        filter: metadata ? { metadata } : undefined, // Apply metadata filter if provided
+        filter: metadata ? metadata  : undefined, // Apply metadata filter if provided
         includeMetadata: true
     })
     
