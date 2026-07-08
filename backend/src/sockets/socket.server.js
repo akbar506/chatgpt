@@ -45,7 +45,7 @@ async function initSocketServer(httpServer) {
 
                 // Generate embeddings for the user's message
                 const MessageVectors = await vectorService.generateEmbedding(messagePayload.content)
-                
+
                 // Query the vector database (Pinecone) for similar messages
                 const vectorMemory = await vectorService.queryVectorMemory({
                     vector: MessageVectors[0].values,
@@ -54,7 +54,7 @@ async function initSocketServer(httpServer) {
                         userId: { "$eq": socket.user._id.toString() },
                     }
                 })
-                
+
                 // Save the generated embeddings to the vector database (Pinecone)
                 await vectorService.createVectorMemory({
                     vector: MessageVectors[0].values,
@@ -95,19 +95,55 @@ async function initSocketServer(httpServer) {
 
                 const previousMessagesInstruction = {
                     role: "user",
-                    parts: [{ text: "These are the previous messages in the conversation. Use them to provide context for your response if needed." }]
+                    parts: [{ text: "These are the previous messages in the conversation. Use them to provide context for your response if user has ask query which relates to them. These messages are your second priority." }]
                 }
 
                 const currentChatMessagesInstruction = {
                     role: "user",
-                    parts: [{ text: "These are the messages in the current chat. Use them to provide context for your response if needed." }]
+                    parts: [{ text: "These are the messages in the current chat. Use them to provide context for your response if needed. These messages are your first priority." }]
                 }
 
                 // Combine all the chats and instructions
                 const combineMemory = [previousMessagesInstruction, ...ltm, currentChatMessagesInstruction, ...stm];
-                
+
+                let aiResponse;
                 // Generate AI response based on the conversation history
-                const aiResponse = await aiService.generateAIResponse(combineMemory, messagePayload.thinkingLevel);
+                if (messagePayload.stream) {
+                    const stream = await aiService.generateAIResponseStream(combineMemory, messagePayload.thinkingLevel);
+                    let answer = "";
+                    
+                    // Stream the AI response in chunks and emit each chunk to the client
+                    for await (const chunk of stream) {
+
+                        if (!chunk.text) continue;
+
+                        answer += chunk.text;
+
+                        const words = chunk.text.split(/(\s+)/);
+
+                        for (const word of words) {
+                            socket.emit("ai-chunk", {
+                                chat: messagePayload.chat,
+                                content: word,
+                            });
+                        }
+
+                        // Count tokens after streaming completes
+                        const [promptTokens, completionTokens] = await Promise.all([
+                            aiService.countTokens(combineMemory),
+                            aiService.countTokens(answer),
+                        ]);
+
+                        aiResponse = {
+                            content: answer,
+                            promptTokens: promptTokens,
+                            completionTokens: completionTokens,
+                            totalTokens: promptTokens + completionTokens,
+                        };
+                    }
+                } else {
+                    aiResponse = await aiService.generateAIResponse(combineMemory, messagePayload.thinkingLevel);
+                }
 
                 // Save the AI's response to the database
                 const aiMessage = new messageModel({

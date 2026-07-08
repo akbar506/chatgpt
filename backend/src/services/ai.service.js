@@ -62,7 +62,7 @@ async function generateAIResponse(contents, thinkingLevel = ThinkingLevel.HIGH) 
         config,
         contents,
     });
-    
+
     // Extract the answer from the response object
     const answer = response.candidates[0].content.parts[0].text;
 
@@ -74,6 +74,51 @@ async function generateAIResponse(contents, thinkingLevel = ThinkingLevel.HIGH) 
     };
 }
 
+async function generateAIResponseStream(contents, thinkingLevel = ThinkingLevel.HIGH) {
+    const levelMap = {
+        Minimal: ThinkingLevel.MINIMAL,
+        Low: ThinkingLevel.LOW,
+        Medium: ThinkingLevel.MEDIUM,
+        High: ThinkingLevel.HIGH,
+    };
+
+    const config = {
+        thinkingConfig: {
+            thinkingLevel:
+                levelMap[thinkingLevel] ??
+                ThinkingLevel.HIGH,
+        },
+        systemInstruction: [
+            {
+                text: systemInstructions,
+            },
+        ],
+    };
+
+    const stream = await ai.models.generateContentStream({
+        model: "gemini-3.1-flash-lite",
+        config,
+        contents,
+    });
+
+    return stream;
+}
+
+async function countTokens(contents) {
+    if (!contents || contents.length === 0) {
+        return totalTokens = 0;
+    }
+
+    const response = await ai.models.countTokens({
+        model: "gemini-3.1-flash-lite",
+        contents,
+    });
+    return response.totalTokens;
+}
+
+
 module.exports = {
     generateAIResponse,
+    generateAIResponseStream,
+    countTokens,
 };
