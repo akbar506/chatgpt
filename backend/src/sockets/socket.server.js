@@ -34,26 +34,46 @@ async function initSocketServer(httpServer) {
     io.on("connection", (socket) => {
         socket.on("ai-message", async (messagePayload) => {
             try {
-                // Save the user's message to the database
-                const userMessage = new messageModel({
-                    chat: messagePayload.chat,
-                    user: socket.user._id,
-                    content: messagePayload.content,
-                    role: "user"
-                });
+                const [userMessage, MessageVectors] = await Promise.all([
+                    // Save the user's message to the database
+                    new messageModel({
+                        chat: messagePayload.chat,
+                        user: socket.user._id,
+                        content: messagePayload.content,
+                        role: "user"
+                    }),
+
+                    // Generate embeddings for the user's message
+                    vectorService.generateEmbedding(messagePayload.content),
+                ])
                 await userMessage.save();
 
-                // Generate embeddings for the user's message
-                const MessageVectors = await vectorService.generateEmbedding(messagePayload.content)
+                // Find the chat and update its lastActivity timestamp
+                const chat = await chatModel.findById(messagePayload.chat);
+                if (!chat) {
+                    socket.emit("ai-response-error", { error: "Chat not found" });
+                    return;
+                }
 
-                // Query the vector database (Pinecone) for similar messages
-                const vectorMemory = await vectorService.queryVectorMemory({
-                    vector: MessageVectors[0].values,
-                    topK: 3,
-                    metadata: {
-                        userId: { "$eq": socket.user._id.toString() },
-                    }
-                })
+                if (chat) {
+                    chat.lastActivity = new Date();
+                    await chat.save();
+                }
+
+                const [history, vectorMemory] = await Promise.all([
+                    // Find all messages with the same chat ID to get the conversation history
+                    messageModel.find({
+                        chat: messagePayload.chat
+                    }).sort({ createdAt: -1 }).limit(20).lean().then(messages => messages.reverse()),
+                    // Query the vector database (Pinecone) for similar messages
+                    vectorService.queryVectorMemory({
+                        vector: MessageVectors[0].values,
+                        topK: 3,
+                        metadata: {
+                            userId: { "$eq": socket.user._id.toString() },
+                        }
+                    }),
+                ])
 
                 // Save the generated embeddings to the vector database (Pinecone)
                 await vectorService.createVectorMemory({
@@ -66,16 +86,6 @@ async function initSocketServer(httpServer) {
                     },
                     messageId: userMessage._id.toString()
                 })
-
-                // Find the chat and update its lastActivity timestamp
-                const chat = await chatModel.findById(messagePayload.chat);
-                if (chat) {
-                    chat.lastActivity = new Date();
-                    await chat.save();
-                }
-
-                // Find all messages with the same chat ID to get the conversation history
-                const history = (await messageModel.find({ chat: messagePayload.chat }).sort({ createdAt: -1 }).limit(20)).reverse();
 
                 // Short term memory (STM) from the current chat messages
                 const stm = history.map((chat) => {
@@ -106,12 +116,14 @@ async function initSocketServer(httpServer) {
                 // Combine all the chats and instructions
                 const combineMemory = [previousMessagesInstruction, ...ltm, currentChatMessagesInstruction, ...stm];
 
+                const startTime = Date.now();
+
                 let aiResponse;
                 // Generate AI response based on the conversation history
                 if (messagePayload.stream) {
                     const stream = await aiService.generateAIResponseStream(combineMemory, messagePayload.thinkingLevel);
                     let answer = "";
-                    
+
                     // Stream the AI response in chunks and emit each chunk to the client
                     for await (const chunk of stream) {
 
@@ -145,21 +157,41 @@ async function initSocketServer(httpServer) {
                     aiResponse = await aiService.generateAIResponse(combineMemory, messagePayload.thinkingLevel);
                 }
 
-                // Save the AI's response to the database
-                const aiMessage = new messageModel({
-                    chat: messagePayload.chat,
-                    user: socket.user._id, // AI messages don't have a user
+                const endTime = Date.now();
+                const processingTime = (endTime - startTime) / 1000; // Convert to seconds
+
+                socket.emit("ai-response", {
                     content: aiResponse.content,
-                    role: "model",
+                    chat: messagePayload.chat,
                     promptTokens: aiResponse.promptTokens,
                     completionTokens: aiResponse.completionTokens,
-                    totalTokens: aiResponse.totalTokens
-                })
+                    totalTokens: aiResponse.totalTokens,
+                    totalResponseTime: processingTime,
+                });
+
+                const [aiMessage, aiMessageVectors] = await Promise.all([
+                    // Save the AI's response to the database
+                    new messageModel({
+                        chat: messagePayload.chat,
+                        user: socket.user._id, // AI messages don't have a user
+                        content: aiResponse.content,
+                        role: "model",
+                        promptTokens: aiResponse.promptTokens,
+                        completionTokens: aiResponse.completionTokens,
+                        totalTokens: aiResponse.totalTokens
+                    }),
+
+                    // Generate embeddings for the AI's response
+                    vectorService.generateEmbedding(aiResponse.content),
+
+                    // update the user message promptTokens
+                    userMessage.promptTokens = aiResponse.promptTokens,
+                    userMessage.completionTokens = aiResponse.completionTokens,
+                    userMessage.totalTokens = aiResponse.totalTokens,
+                    userMessage.save(),
+                ])
 
                 await aiMessage.save();
-
-                // Generate embeddings for the AI's response
-                const aiMessageVectors = await vectorService.generateEmbedding(aiResponse.content)
 
                 // Save the generated embeddings for the AI's response to the vector database (Pinecone)
                 await vectorService.createVectorMemory({
@@ -171,20 +203,6 @@ async function initSocketServer(httpServer) {
                         content: aiResponse.content
                     },
                     messageId: aiMessage._id.toString()
-                })
-
-                // update the user message promptTokens
-                userMessage.promptTokens = aiResponse.promptTokens;
-                userMessage.completionTokens = aiResponse.completionTokens;
-                userMessage.totalTokens = aiResponse.totalTokens;
-                await userMessage.save();
-
-                socket.emit("ai-response", {
-                    content: aiResponse.content,
-                    chat: messagePayload.chat,
-                    promptTokens: aiResponse.promptTokens,
-                    completionTokens: aiResponse.completionTokens,
-                    totalTokens: aiResponse.totalTokens
                 });
             } catch (error) {
                 console.error("Error processing AI message:", error);
