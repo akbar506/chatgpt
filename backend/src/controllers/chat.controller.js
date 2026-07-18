@@ -1,6 +1,7 @@
 const userModel = require("../models/user.model")
 const chatModel = require("../models/chat.model")
 const messageModel = require("../models/message.model")
+const aiService = require("../services/ai.service")
 const { Pinecone } = require('@pinecone-database/pinecone')
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
@@ -10,15 +11,25 @@ const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
 const chatgptIndex = pc.Index(process.env.PINECONE_INDEX_NAME);
 
 async function createChat(req, res) {
-    const { title } = req.body;
+    const { prompt } = req.body;
 
     try {
         // Get the user object which we save in auth.middleware.js
         const user = req.user;
 
+        if (!prompt) {
+            return res.status(400).json({
+                success: false,
+                message: "Prompt is required"
+            })
+        }
+        
+        // Generate a title for the chat using the AI
+        const { title } = await aiService.generateTitle(prompt);
+
         const chat = new chatModel({
             user: user._id,
-            title
+            title 
         })
         await chat.save();
         res.status(200).json({
@@ -90,7 +101,26 @@ async function deleteChat(req, res) {
     }
 }
 
+async function getChats(req, res) {
+    try {
+        const user = req.user;
+
+        const chats = await chatModel.find({ user: user._id }).sort({ lastActivity: -1 });
+        res.status(200).json({
+            success: true,
+            chats
+        })
+    } catch (error) {
+        console.error("Error fetching chats", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+}
+
 module.exports = {
     createChat,
     deleteChat,
+    getChats,
 }

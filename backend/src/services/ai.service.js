@@ -116,9 +116,33 @@ async function countTokens(contents) {
     return response.totalTokens;
 }
 
+async function generateTitle(contents) {
+    const config = {
+        thinkingConfig: {
+            thinkingLevel: ThinkingLevel.Minimal, // Set the thinking level based on the parameter
+        },
+        systemInstruction: [
+            {
+                text: "You are a helpful, knowledgeable, and reliable AI assistant. Your task is to generate a concise and relevant title for the given content. The title should accurately reflect the main topic or theme of the content, be clear and informative, and be no longer than 7 words. Avoid using generic titles like 'Untitled' or 'No Title'.",
+            }
+        ],
+    }
+
+    const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite",
+        config,
+        contents,
+    });
+
+    // Extract the answer from the response object
+    const answer = response.candidates[0].content.parts[0].text;
+
+    return { title: answer };
+}
 
 module.exports = {
     generateAIResponse,
     generateAIResponseStream,
     countTokens,
+    generateTitle,
 };
