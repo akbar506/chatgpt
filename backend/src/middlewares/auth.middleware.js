@@ -2,9 +2,9 @@ const jwt = require("jsonwebtoken")
 const userModel = require("../models/user.model")
 
 const authUser = async (req, res, next) => {
-    const { token } = req.cookies;
+    const accessToken = req.headers.authorization?.split(" ")[1] // Get the token from the Authorization header
 
-    if(!token) {
+    if(!accessToken) {
         return res.status(401).json({
             success: false,
             message: "Unauthorized"
@@ -13,9 +13,9 @@ const authUser = async (req, res, next) => {
 
     try {
         // Get the decoded object in jwt token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const decoded = jwt.verify(accessToken, process.env.JWT_SECRET)
         
-        const user = userModel.findById(decoded.id)
+        const user = await userModel.findById(decoded.userId)
         // Add user object in request object
         req.user = user
 
