@@ -14,13 +14,13 @@ async function initSocketServer(httpServer) {
         // Get the token from the cookie in the socket handshake headers
         const cookies = cookie.parseCookie(socket.handshake.headers?.cookie || "");
 
-        if (!cookies.token) {
+        if (!cookies.accessToken) {
             return next(new Error("Authentication error: No token provided"));
         }
 
         try {
             // Verify the token and get the user ID
-            const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(cookies.accessToken, process.env.JWT_SECRET);
             const user = await userModel.findById(decoded.userId);
 
             // Attach the user object to the socket for future use
