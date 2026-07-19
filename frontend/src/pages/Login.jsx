@@ -19,8 +19,20 @@ import {
 import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
 import { loginSchema } from "@/schema/loginSchema"
+import { useDispatch, useSelector } from "react-redux"
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { loginUser } from "@/store/auth/authActions"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircleIcon } from "lucide-react"
 
 export default function Login() {
+    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const authError = useSelector((state) => state.auth.error);
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
     const form = useForm({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -30,8 +42,16 @@ export default function Login() {
     })
 
     const onSubmit = (data) => {
-        console.log(data)
+        setLoading(true);
+        dispatch(loginUser(data));
+        setLoading(false);
     }
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate("/");
+        }
+    }, [isAuthenticated, navigate]);
     return (
         <>
             <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -43,6 +63,13 @@ export default function Login() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
+                        {authError && (<Alert variant="destructive" className="my-3">
+                            <AlertCircleIcon />
+                            <AlertTitle>Login failed</AlertTitle>
+                            <AlertDescription className="text-sm">
+                                {authError || "An error occurred during login."}
+                            </AlertDescription>
+                        </Alert>)}
                         <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
                             <FieldGroup>
                                 <Controller
@@ -90,7 +117,9 @@ export default function Login() {
                                         </Field>
                                     )}
                                 />
-                                <Button type="submit" className="h-9">Login</Button>
+                                <Button type="submit" className="h-9" disabled={loading}>
+                                    {loading ? <Loader className="animate-spin" /> : "Login"}
+                                </Button>
                             </FieldGroup>
                         </form>
                         <Marker variant="separator" className="my-4">

@@ -17,10 +17,26 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field"
+
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import { registerUser } from "@/store/auth/authActions"
+import { AlertCircleIcon, Loader } from "lucide-react"
+import { useState, useEffect } from "react"
 
 export default function Register() {
+    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const authError = useSelector((state) => state.auth.error);
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
     const form = useForm({
         resolver: zodResolver(registerSchema),
         defaultValues: {
@@ -32,8 +48,17 @@ export default function Register() {
     })
 
     const onSubmit = (data) => {
-        console.log(data)
+        setLoading(true);
+        dispatch(registerUser(data));
+        setLoading(false);
     }
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate("/");
+        }
+    }, [isAuthenticated, navigate]);
+    
     return (
         <>
             <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -45,6 +70,13 @@ export default function Register() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
+                        {authError && (<Alert variant="destructive" className="my-3">
+                            <AlertCircleIcon />
+                            <AlertTitle>Registration failed</AlertTitle>
+                            <AlertDescription className="text-sm">
+                                {authError || "An error occurred during registration."}
+                            </AlertDescription>
+                        </Alert>)}
                         <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
                             <FieldGroup>
                                 <Controller
@@ -136,7 +168,9 @@ export default function Register() {
                                         </Field>
                                     )}
                                 />
-                                <Button type="submit" className="h-9">Register</Button>
+                                <Button type="submit" className="h-9" disabled={loading}>
+                                    {loading ? <Loader className="animate-spin" /> : "Register"}
+                                </Button>
                             </FieldGroup>
                         </form>
                         <Marker variant="separator" className="my-4">

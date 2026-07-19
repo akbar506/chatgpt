@@ -15,12 +15,15 @@ export const userSlice = createSlice({
         removeUser: (state) => {
             state.profile = null
         },
-        setError: (state, action) => {
+        setUserError: (state, action) => {
             state.error = action.payload
+        },
+        resetUserError: (state) => {
+            state.error = null
         }
     },
 })
 
-export const { loadUser, removeUser, setError } = userSlice.actions
+export const { loadUser, removeUser, setUserError, resetUserError } = userSlice.actions
 
 export default userSlice.reducer

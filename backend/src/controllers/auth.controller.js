@@ -9,7 +9,9 @@ const registerUser = async (req, res) => {
         const isUserExist = await userModel.findOne({ email })
 
         if (isUserExist) {
-            return res.status(400).json({ message: "User already exists" })
+            return res.status(400).json({ 
+                success: false,
+                message: "User with this email already exists. Try logging in." })
         }
 
         const hashedPassword = await bcrypt.hash(password, 10)
@@ -23,8 +25,8 @@ const registerUser = async (req, res) => {
             password: hashedPassword
         })
 
-        const refreshToken = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-        const accessToken = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET, { expiresIn: "10m" });
+        const refreshToken = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        const accessToken = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: "10m" });
 
         await newUser.save()
         
