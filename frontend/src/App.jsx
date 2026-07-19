@@ -1,9 +1,9 @@
-
+import AppRoutes from "./Routes/routes"
 function App() {
 
   return (
     <>
-        <p>Hi, First React Project</p>
+      <AppRoutes />
     </>
   )
 }
