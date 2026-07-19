@@ -12,6 +12,6 @@ router.post("/login", authControllers.loginUser)
 router.post("/logout", authControllers.logoutUser)
 
 /* /api/auth/refresh */
-router.post("/refresh", authControllers.getAccessToken)
+router.get("/refresh", authControllers.getAccessToken)
 
 module.exports = router

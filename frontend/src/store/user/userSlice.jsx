@@ -12,8 +12,8 @@ export const userSlice = createSlice({
         loadUser: (state, action) => {
             state.profile = action.payload
         },
-        updateUser: (state, action) => {
-            state.profile = { ...state.profile, ...action.payload } // Merge the existing profile with the updated data
+        removeUser: (state) => {
+            state.profile = null
         },
         setError: (state, action) => {
             state.error = action.payload
@@ -21,6 +21,6 @@ export const userSlice = createSlice({
     },
 })
 
-export const { loadUser } = userSlice.actions
+export const { loadUser, removeUser, setError } = userSlice.actions
 
 export default userSlice.reducer
