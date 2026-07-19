@@ -1,5 +1,4 @@
-import { useSelector } from "react-redux";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { createChat } from "@/store/chat/chatActions";
 import { chatSchema } from "@/schema/chatSchema";
