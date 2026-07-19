@@ -19,7 +19,8 @@ export const authSlice = createSlice({
             state.isAuthenticated = false
         },
         updateAccessToken: (state, action) => {
-            state.accessToken = action.payload
+            state.accessToken = action.payload,
+            state.isAuthenticated = true
         },
         setAuthError: (state, action) => {
             state.error = action.payload

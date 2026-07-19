@@ -3,7 +3,7 @@ import axios from "axios";
 export const refreshAccessToken = async () => {
     try {
         const response = await axios.get(
-            `${import.meta.env.BACKEND_URL}/api/auth/refresh`
+            `${import.meta.env.VITE_BACKEND_URL}/api/auth/refresh`
             , {
                 withCredentials: true, // Ensure cookies are sent with the request
             }

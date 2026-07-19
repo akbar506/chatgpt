@@ -20,20 +20,20 @@ const chatSlice = createSlice({
             )
         },
         addConversation: (state, action) => {
-            state.conversations.push(action.payload)
+            state.conversations.unshift(action.payload)
         },
         setCurrentConversation: (state, action) => {
             state.currentConversation = action.payload
         },
-        setLoading: (state, action) => {
+        setChatCreating: (state, action) => {
             state.loading = action.payload
         },
-        setError: (state, action) => {
+        setChatError: (state, action) => {
             state.error = action.payload
         },
     }
 });
 
-export const { setConversations, deleteConversation, addConversation, setCurrentConversation, setLoading, setError } = chatSlice.actions
+export const { setConversations, deleteConversation, addConversation, setCurrentConversation, setChatCreating, setChatError } = chatSlice.actions
 
 export default chatSlice.reducer

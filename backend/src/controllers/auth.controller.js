@@ -107,7 +107,7 @@ const logoutUser = async (req, res) => {
 const getAccessToken = async (req, res) => {
     try {
         const refreshToken = req.cookies.refreshToken;
-
+        console.log("Refresh Token:", refreshToken);
         if (!refreshToken) {
             return res.status(401).json({ message: "Unauthorized", success: false });
         }
