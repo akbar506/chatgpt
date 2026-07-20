@@ -8,19 +8,26 @@ const chatModel = require("../models/chat.model");
 const vectorService = require("../services/vector.service")
 
 async function initSocketServer(httpServer) {
-    const io = new Server(httpServer, {});
+    const io = new Server(httpServer, {
+        cors: {
+            origin: [process.env.FRONTEND_URL],
+            credentials: true,
+        },
+    });
 
     io.use(async (socket, next) => {
+        console.log(socket.handshake)
         // Get the token from the cookie in the socket handshake headers
-        const cookies = cookie.parseCookie(socket.handshake.headers?.cookie || "");
-
-        if (!cookies.accessToken) {
+        const token = socket.handshake.auth.token; // For Production
+        const cookies = cookie.parseCookie(socket.handshake.headers?.cookie || ""); // For Development
+        
+        if (!token && !cookies.accessToken) {
             return next(new Error("Authentication error: No token provided"));
         }
 
         try {
             // Verify the token and get the user ID
-            const decoded = jwt.verify(cookies.accessToken, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token || cookies.accessToken, process.env.JWT_SECRET);
             const user = await userModel.findById(decoded.userId);
 
             // Attach the user object to the socket for future use
@@ -32,6 +39,7 @@ async function initSocketServer(httpServer) {
     })
 
     io.on("connection", (socket) => {
+        console.log(socket.id);
         socket.on("ai-message", async (messagePayload) => {
             try {
                 const [userMessage, MessageVectors] = await Promise.all([

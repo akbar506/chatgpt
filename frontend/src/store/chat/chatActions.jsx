@@ -1,5 +1,12 @@
 import axios from "@/config/axiosConfig";
-import { setChatError, setConversations, addConversation, setChatCreating } from "./chatSlice";
+import { 
+    setChatError, 
+    setConversations, 
+    addConversation, 
+    setChatCreating, 
+    setCurrentConversation,
+    setInitialMessage,
+} from "./chatSlice";
 
 export const fetchChats = () => async (dispatch, getState) => {
     try {
@@ -20,6 +27,8 @@ export const createChat = (chatData) => async (dispatch) => {
         const response = await axios.post(`/chat`, chatData);
         const { chat } = response.data;
         dispatch(addConversation(chat));
+        dispatch(setCurrentConversation(chat._id));
+        dispatch(setInitialMessage(chatData.prompt)); // Store the initial message in the state
         return chat;
     } catch (error) {
         dispatch(setChatError(error.response?.data?.message || "Failed to create chat"));

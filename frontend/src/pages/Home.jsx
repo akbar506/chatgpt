@@ -15,7 +15,6 @@ export default function Home() {
     const navigate = useNavigate();
 
     const dispatch = useDispatch();
-    const [placeholder, setPlaceholder] = useState("Ask Anything");
     
     const form = useForm({
         resolver: zodResolver(chatSchema),
@@ -43,21 +42,19 @@ export default function Home() {
                             control={form.control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid}>
-                                    <div className="flex items-start px-3 py-2 relative">
-                                        {field.value === "" && <span className="text-muted-foreground absolute left-13.5 bottom-6 text-sm">
-                                            {placeholder}
-                                        </span>}
+                                    <div className="flex items-center rounded-4xl justify-between border-2 px-3 py-2 relative bg-[#212121]">
                                         <Textarea
-                                            placeholder=""
-                                            className="border-0 focus-visible:ring-0 pl-10 bg-transparent min-h-11 max-h-40 overflow-y-auto rounded-4xl font-normal w-full resize-none outline-none text-lg sm:text-xl"
+                                            placeholder="Ask Anything"
+                                            className="border-0 focus-visible:ring-0  bg-[#212121] field-sizing-content max-h-40 overflow-y-auto rounded-4xl min-h-8 font-normal w-11/12 resize-none outline-none text-lg sm:text-xl"
                                             {...field}
                                             id="form-rhf-demo-title"
                                             aria-invalid={fieldState.invalid}
                                             autoComplete="off"
+                                            rows="1"
                                         />
                                         <Button
                                             type="submit"
-                                            className="rounded-full h-9 absolute right-6 bottom-3"
+                                            className="rounded-full h-9 absolute bottom-2.5 right-3"
                                         >
                                             <ArrowUp />
                                         </Button>

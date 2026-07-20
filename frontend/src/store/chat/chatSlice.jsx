@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit"
 const initialState = {
     conversations: [],
     currentConversation: null,
+    initialMessage: null,
     loading: false,
     error: null,
 }
@@ -31,9 +32,12 @@ const chatSlice = createSlice({
         setChatError: (state, action) => {
             state.error = action.payload
         },
+        setInitialMessage: (state, action) => {
+            state.initialMessage = action.payload
+        }
     }
 });
 
-export const { setConversations, deleteConversation, addConversation, setCurrentConversation, setChatCreating, setChatError } = chatSlice.actions
+export const { setConversations, deleteConversation, addConversation, setCurrentConversation, setChatCreating, setChatError, setInitialMessage } = chatSlice.actions
 
 export default chatSlice.reducer

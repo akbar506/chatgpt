@@ -1,12 +1,15 @@
 import AppRoutes from "./Routes/routes"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 function App() {
 
   return (
     <>
-    <main className="min-h-screen">
-      <AppRoutes />
-    </main>
+      <TooltipProvider>
+        <main className="min-h-screen">
+          <AppRoutes />
+        </main>
+      </TooltipProvider>
     </>
   )
 }

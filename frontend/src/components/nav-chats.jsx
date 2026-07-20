@@ -6,7 +6,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { Link } from "react-router-dom"
+import { NavLink } from "react-router-dom"
 
 export function NavChats({
   chats,
@@ -18,11 +18,14 @@ export function NavChats({
       <SidebarMenu>
         {chats.map((item) => (
           <SidebarMenuItem key={item._id}>
-            <SidebarMenuButton asChild>
-              <Link to={`/chat/${item._id}`}>
+            <NavLink to={`/chat/${item._id}`} className={({ isActive }) =>
+              `flex items-center gap-2 ${isActive ? "bg-muted rounded-md" : "hover:bg-muted rounded-xl"}`
+
+            }>
+              <SidebarMenuButton asChild>
                 <span className="text-nowrap w-11/12">{item.title}</span>
-              </Link>
-            </SidebarMenuButton>
+              </SidebarMenuButton>
+            </NavLink>
             {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
