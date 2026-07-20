@@ -14,7 +14,7 @@ export default function AppLayout() {
       <AppSidebar />
 
       <SidebarInset>
-        <header className="flex h-14 items-center border-b px-4">
+        <header className="flex h-14 items-center border-b px-4 sticky top-0 right-0 left-0 z-10 bg-background">
           <SidebarTrigger />
         </header>
 

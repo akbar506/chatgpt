@@ -16,7 +16,6 @@ async function initSocketServer(httpServer) {
     });
 
     io.use(async (socket, next) => {
-        console.log(socket.handshake)
         // Get the token from the cookie in the socket handshake headers
         const token = socket.handshake.auth.token; // For Production
         const cookies = cookie.parseCookie(socket.handshake.headers?.cookie || ""); // For Development
@@ -42,6 +41,10 @@ async function initSocketServer(httpServer) {
         console.log(socket.id);
         socket.on("ai-message", async (messagePayload) => {
             try {
+                if (!messagePayload.chat || !messagePayload.content || !messagePayload.thinkingLevel) {
+                    socket.emit("ai-response-error", { error: "Invalid message payload" });
+                    return;
+                }
                 const [userMessage, MessageVectors] = await Promise.all([
                     // Save the user's message to the database
                     new messageModel({

@@ -7,7 +7,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-export default function ResponseInfo({ content, promptTokens, completionTokens, totalTokens }) {
+export default function ResponseInfo({ content, totalResponseTime, promptTokens, completionTokens, totalTokens }) {
     const copyToClipboard = async (text) => {
         try {
             await navigator.clipboard.writeText(text);
@@ -21,7 +21,7 @@ export default function ResponseInfo({ content, promptTokens, completionTokens, 
 
             <div className="flex space-x-2 items-center">
 
-                <Tooltip key={"bottom"}>
+                <Tooltip>
                     <TooltipTrigger>
                         <Button size="xs" variant="outline" className="p-3" onClick={() => copyToClipboard(content)}><Copy /></Button>
                     </TooltipTrigger>
@@ -30,6 +30,14 @@ export default function ResponseInfo({ content, promptTokens, completionTokens, 
                     </TooltipContent>
                 </Tooltip>
 
+                {/* <Tooltip>
+                    <TooltipTrigger>
+                        <Button size="xs" variant="outline" className="p-3 text-muted-foreground cursor-default">{totalResponseTime}s</Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-primary-foreground text-primary">
+                        <p>Total Response Time</p>
+                    </TooltipContent>
+                </Tooltip> */}
 
                 <Tooltip>
                     <TooltipTrigger>

@@ -86,19 +86,19 @@ Formatting Rules
 
 Long answers should generally follow this structure:
 
-# Overview
+## Overview
 
 Brief summary.
 
-# Explanation
+## Explanation
 
 Detailed explanation.
 
-# Example
+## Example
 
 Examples if helpful.
 
-# Conclusion
+## Conclusion
 
 Short final takeaway.
 
@@ -254,7 +254,7 @@ async function generateTitle(contents) {
         },
         systemInstruction: [
             {
-                text: "You are a helpful, knowledgeable, and reliable AI assistant. Your task is to generate a concise and relevant title for the given content. The title should accurately reflect the main topic or theme of the content, be clear and informative, and be no longer than 7 words. Avoid using generic titles like 'Untitled' or 'No Title'.",
+                text: "You are a helpful, knowledgeable, and reliable AI assistant. Your task is to generate a concise and relevant title for the given content. The title should accurately reflect the main topic or theme of the content, be clear and informative, and be no longer than 7 words. Avoid using generic titles like 'Untitled' or 'No Title' and most importantly, do not include any hashtags, emojis, markdown, or special characters in the title. The title should be suitable for use as a heading or label for the content.",
             }
         ],
     }
