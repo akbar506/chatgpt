@@ -15,13 +15,20 @@ export default function Home() {
     const navigate = useNavigate();
 
     const dispatch = useDispatch();
-    
+
     const form = useForm({
         resolver: zodResolver(chatSchema),
         defaultValues: {
             prompt: ""
         }
     })
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            form.handleSubmit(onSubmit)();
+        }
+    };
 
     const onSubmit = async (data) => {
         const createdChat = await dispatch(createChat(data));
@@ -42,15 +49,15 @@ export default function Home() {
                             control={form.control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid}>
-                                    <div className="flex items-center rounded-4xl justify-between border-2 px-3 py-2 relative bg-[#212121]">
+                                    <div className="flex items-center rounded-4xl justify-between border-2 px-3 py-2 relative dark:bg-[#212121]">
                                         <Textarea
                                             placeholder="Ask Anything"
-                                            className="border-0 focus-visible:ring-0  bg-[#212121] field-sizing-content max-h-40 overflow-y-auto rounded-4xl min-h-8 font-normal w-11/12 resize-none outline-none text-lg sm:text-xl"
+                                            className="border-0 focus-visible:ring-0 dark:bg-[#212121] field-sizing-content max-h-40 overflow-y-auto rounded-4xl min-h-8 font-normal w-11/12 resize-none outline-none text-lg sm:text-xl"
                                             {...field}
                                             id="form-rhf-demo-title"
-                                            aria-invalid={fieldState.invalid}
                                             autoComplete="off"
                                             rows="1"
+                                            onKeyDown={handleKeyDown}
                                         />
                                         <Button
                                             type="submit"

@@ -55,6 +55,13 @@ export default function Chat() {
         smooth: true,
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            form.handleSubmit(onSubmit)();
+        }
+    };
+
     useEffect(() => {
         if (initialMessage) {
             const data = {
@@ -63,9 +70,10 @@ export default function Chat() {
                 stream: true,
                 chat: id,
             }
-            setMessages((prevMessages) => [...prevMessages, { _id: nanoid(), role: "user", content: data.content }]);
-            onSubmit(data);
-            dispatch(setInitialMessage(null));
+            setTimeout(() => {
+                onSubmit(data);
+                dispatch(setInitialMessage(null));
+            }, 500);
         }
     }, [id, initialMessage, dispatch]);
 
@@ -120,7 +128,6 @@ export default function Chat() {
                     setChunkedResponse("");
                     form.reset({ content: "", thinkingLevel: form.getValues("thinkingLevel"), stream: form.getValues("stream") });
                     setGenerating(false);
-                    console.log("Received AI response:", response);
                     animateScroll.scrollToBottom(options);
                     socket.disconnect();
                 });
@@ -150,8 +157,8 @@ export default function Chat() {
                 <div className="p-2 w-full max-w-3xl pb-32">
                     {messages.map((message) => (
                         <div key={message._id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-2`}>
-                            <div className={` ${message.role === "user" ? "bg-[#212121] px-4 py-2 rounded-3xl max-w-10/12 sm:max-w-1/2  text-white" : ""}`}>
-                                <MarkdownRender content={message.content} />
+                            <div className={` ${message.role === "user" ? "bg-[#f3f3f3] dark:bg-[#212121] px-4 py-2 rounded-3xl max-w-10/12 sm:max-w-1/2" : ""}`}>
+                                <MarkdownRender content={message.content} role={message.role}/>
                                 <div className={`mt-2 ${message.role === "user" ? "hidden" : ""}`}>
                                     <ResponseInfo content={message.content} promptTokens={message.promptTokens} completionTokens={message.completionTokens} totalTokens={message.totalTokens} />
                                 </div>
@@ -179,7 +186,7 @@ export default function Chat() {
                 </div>
                 <div className="p-2 w-full max-w-3xl bottom-4 space-y-3 fixed">
                     <p className="text-xs select-none text-muted-foreground text-center">ChatGPT Clone can make mistakes. Check important info</p>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 rounded-4xl border-2 px-3 py-2 relative bg-[#212121]">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 bg-white rounded-4xl border-2 px-3 py-2 relative dark:bg-[#212121]">
                         <div className="flex items-center justify-between">
                             <Controller
                                 name="content"
@@ -188,11 +195,12 @@ export default function Chat() {
 
                                     <Textarea
                                         placeholder="Ask Anything"
-                                        className="border-0 focus-visible:ring-0  bg-inherit] field-sizing-content max-h-40 overflow-y-auto rounded-4xl min-h-8 font-normal w-10/12 resize-none outline-none text-lg sm:text-xl"
+                                        className="border-0 focus-visible:ring-0 dark:bg-[#212121] field-sizing-content max-h-40 overflow-y-auto rounded-4xl min-h-8 font-normal w-10/12 resize-none outline-none text-lg sm:text-xl"
                                         {...field}
                                         id="form-rhf-demo-title"
                                         autoComplete="off"
                                         rows="1"
+                                        onKeyDown={handleKeyDown}
                                     />
                                 )}
                             />
