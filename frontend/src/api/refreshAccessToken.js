@@ -8,7 +8,7 @@ export const refreshAccessToken = async () => {
                 withCredentials: true, // Ensure cookies are sent with the request
             }
         )
-        return response.data.accessToken;
+        return response.data;
     } catch (error) {
         console.error("Error refreshing access token:", error);
         throw error;

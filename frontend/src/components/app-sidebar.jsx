@@ -22,20 +22,13 @@ export default function AppSidebar({ ...props }) {
   const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
   const conversations = useSelector((state) => state.chat.conversations)
+  const user = useSelector((state) => state.user.profile)
 
   useEffect(() => {
     setLoading(true)
     dispatch(fetchChats())
       .then(() => setLoading(false))
   }, [])
-
-  const data = {
-    user: {
-      name: "shadcn",
-      email: "m@example.com",
-      avatar: "/avatars/shadcn.jpg",
-    },
-  }
   return (
     <Sidebar collapsible="icon" {...props} className="bg-black text-lg" >
       <SidebarHeader className="border-b p-2 mt-3">
@@ -74,7 +67,7 @@ export default function AppSidebar({ ...props }) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user && <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>
   )

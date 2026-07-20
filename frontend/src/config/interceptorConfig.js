@@ -1,6 +1,6 @@
 import axios from "./axiosConfig"
 import { refreshAccessToken } from "@/api/refreshAccessToken";
-import { removeUser } from "@/store/user/userSlice"
+import { removeUser, loadUser } from "@/store/user/userSlice"
 
 import {
     updateAccessToken,
@@ -103,18 +103,19 @@ axios.interceptors.response.use(
 
         try {
 
-            const newAccessToken =
+            const {accessToken, user} =
                 await refreshAccessToken();
 
             store.dispatch(
-                updateAccessToken(newAccessToken)
+                updateAccessToken(accessToken)
             );
+            store.dispatch(loadUser(user));
 
             // Resolve all queued requests with the new token
-            processQueue(null, newAccessToken);
+            processQueue(null, accessToken);
 
             originalRequest.headers.Authorization =
-                `Bearer ${newAccessToken}`;
+                `Bearer ${accessToken}`;
 
             return axios(originalRequest);
 

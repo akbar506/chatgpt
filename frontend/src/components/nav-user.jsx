@@ -27,11 +27,31 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { logout } from "@/api/logout";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { clearAccessToken } from "@/store/auth/authSlice";
+import { removeUser } from "@/store/user/userSlice";
+// import { }
+import { useNavigate } from "react-router-dom";
 
 export function NavUser({
   user,
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      dispatch(clearAccessToken());
+      dispatch(removeUser());
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -43,11 +63,11 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage src={""} alt={user.fullName.firstName} />
+                <AvatarFallback className="rounded-lg">{user.fullName.firstName.charAt(0)}{user.fullName.lastName.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user.fullName.firstName} {user.fullName.lastName}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -59,18 +79,20 @@ export function NavUser({
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={""} alt={user.fullName.firstName} />
+                    <AvatarFallback className="rounded-lg">{user.fullName.firstName.charAt(0)}{user.fullName.lastName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user.fullName.firstName} {user.fullName.lastName}</span>
+                    <span className="truncate text-xs">{user.email}</span>
+                  </div>
                 </div>
-              </div>
-            </DropdownMenuLabel>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
@@ -94,7 +116,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
