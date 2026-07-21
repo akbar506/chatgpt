@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom"
 import { Loader, Share, Trash2 } from "lucide-react"
 import { toast } from "@/components/CustomSonner"
 import { Button } from "@/components/ui/button"
+import { shareChat } from "@/api/shareChat"
 
 export default function AppLayout() {
   const [deleting, setDeleting] = useState(false);
@@ -24,8 +25,6 @@ export default function AppLayout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const chatId = useSelector((state) => state.chat.currentConversation);
-  // Public link copied to your clipboard
-  // Anyone with this link can see this conversation
 
   const handleDeleteChat = async () => {
     if (!chatId) return;
@@ -47,6 +46,33 @@ export default function AppLayout() {
     }
   }
 
+  const handleShareChat = async () => {
+    if (!chatId) return;
+    setLoading(true);
+    try {
+      const result = await shareChat(chatId);
+      if (result.success) {
+        navigator.clipboard.writeText(result.link);
+        toast({
+          title: 'Link copied to clipboard',
+          description: 'Anyone with this link can see this conversation.',
+        });
+      } else {
+        toast({
+          title: 'Failed to share chat',
+          description: result.message,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Failed to share chat',
+        description: 'An error occurred while trying to share the chat. Please try again later.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -65,8 +91,8 @@ export default function AppLayout() {
             {chatId && (<>
               |
               <div className="flex items-center gap-2">
-                <Button size="sm" className="flex items-center" disabled={deleting}>
-                  <Share /> <span>Share</span>
+                <Button size="sm" className="flex items-center" disabled={loading} onClick={handleShareChat}>
+                  {loading ? <Loader className="animate-spin" /> : <Share />} <span>Share</span>
                 </Button>
                 <Button variant="destructive" size="sm" className="flex items-center" onClick={handleDeleteChat} disabled={deleting}>
                   <Trash2 /> <span>Delete</span>

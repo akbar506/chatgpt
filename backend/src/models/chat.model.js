@@ -10,6 +10,14 @@ const chatSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    shared: {
+        type: Boolean,
+        default: false
+    },
+    sharedLink: {
+        type: String,
+        default: null
+    },
     lastActivity: {
         type: Date,
         default: Date.now,

@@ -24,13 +24,13 @@ async function createChat(req, res) {
                 message: "Prompt is required"
             })
         }
-        
+
         // Generate a title for the chat using the AI
         const { title } = await aiService.generateTitle(prompt);
 
         const chat = new chatModel({
             user: user._id,
-            title 
+            title
         })
         await chat.save();
         res.status(200).json({
@@ -120,8 +120,100 @@ async function getChats(req, res) {
     }
 }
 
+async function shareChat(req, res) {
+    try {
+        const { chatId } = req.params;
+        const user = req.user;
+
+        if (!chatId) {
+            return res.status(400).json({
+                success: false,
+                message: "Chat ID is required"
+            })
+        }
+
+        const chat = await chatModel.findById(chatId);
+
+        if (!chat) {
+            return res.status(404).json({
+                success: false,
+                message: "Chat not found"
+            })
+        }
+
+        // Check if the user is the owner of the chat
+        if (chat.user.toString() !== user._id.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to share this chat"
+            })
+        }
+
+        // Check if the chat link is already shared, if yes return the existing link
+        if (chat.shared) {
+            return res.status(200).json({
+                success: true,
+                message: "Chat shared successfully",
+                link: `${process.env.FRONTEND_URL}/share/${chat.sharedLink}`
+            })
+        }
+
+        // Generate a unique shareable link for the chat
+        const shareToken = crypto.randomBytes(16).toString('hex');
+        chat.sharedLink = shareToken;
+        chat.shared = true;
+        await chat.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Chat shared successfully",
+            link: `${process.env.FRONTEND_URL}/share/${shareToken}`
+        })
+    } catch (error) {
+        console.error("Error sharing chat", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+}
+
+async function getSharedChat(req, res) {
+    try {
+        const { shareToken } = req.params;
+        const chat = await chatModel.findOne({ sharedLink: shareToken });
+
+        if (!chat || !chat.shared) {
+            return res.status(404).json({
+                success: false,
+                message: "Shared chat not found"
+            })
+        }
+
+        const messages = await messageModel.find({ chat: chat._id }).sort({ createdAt: 1 });
+
+        res.status(200).json({
+            success: true,
+            chat: {
+                _id: chat._id,
+                title: chat.title,
+                lastActivity: chat.lastActivity,
+            },
+            messages
+        })
+    } catch (error) {
+        console.error("Error fetching shared chat", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+}
+
 module.exports = {
     createChat,
     deleteChat,
     getChats,
+    shareChat,
+    getSharedChat
 }
