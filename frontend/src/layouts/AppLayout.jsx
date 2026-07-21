@@ -9,8 +9,44 @@ import { GithubDark, GithubLight } from "@/components/icon/github"
 import LinkedinIcon from "@/components/icon/linkedin"
 import AppSidebar from "@/components/app-sidebar"
 import { Link } from "react-router-dom"
+import { useDispatch } from "react-redux"
+import { useSelector } from "react-redux"
+import { deleteChat } from "@/store/chat/chatActions"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Loader, Share, Trash2 } from "lucide-react"
+import { toast } from "@/components/CustomSonner"
+import { Button } from "@/components/ui/button"
 
 export default function AppLayout() {
+  const [deleting, setDeleting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const chatId = useSelector((state) => state.chat.currentConversation);
+  // Public link copied to your clipboard
+  // Anyone with this link can see this conversation
+
+  const handleDeleteChat = async () => {
+    if (!chatId) return;
+    setDeleting(true);
+
+    try {
+      dispatch(deleteChat(chatId));
+      setDeleting(false);
+      navigate("/");
+      toast({
+        title: 'Chat deleted successfully',
+        description: 'The chat has been deleted permanently. You can create a new chat or select another conversation.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Failed to delete chat',
+        description: 'An error occurred while trying to delete the chat. Please try again later.',
+      });
+    }
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -26,6 +62,17 @@ export default function AppLayout() {
             <Link to="https://www.linkedin.com/in/akber-ali-dev/" target="_blank" rel="noopener noreferrer">
               <span><LinkedinIcon w="30px" h="30px" /></span>
             </Link>
+            {chatId && (<>
+              |
+              <div className="flex items-center gap-2">
+                <Button size="sm" className="flex items-center" disabled={deleting}>
+                  <Share /> <span>Share</span>
+                </Button>
+                <Button variant="destructive" size="sm" className="flex items-center" onClick={handleDeleteChat} disabled={deleting}>
+                  <Trash2 /> <span>Delete</span>
+                </Button>
+              </div>
+            </>)}
           </div>
         </header>
 

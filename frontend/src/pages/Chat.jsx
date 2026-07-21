@@ -26,7 +26,7 @@ import { getMessages } from "@/api/getMessages";
 import MarkdownRender from "@/components/MarkdownRender";
 import { animateScroll } from 'react-scroll';
 import { socketClient } from "@/socket/socket";
-import { setInitialMessage } from "@/store/chat/chatSlice";
+import { setInitialMessage, setCurrentConversation } from "@/store/chat/chatSlice";
 import { nanoid } from 'nanoid'
 
 export default function Chat() {
@@ -90,9 +90,14 @@ export default function Chat() {
             }
         };
         fetchMessages();
+        dispatch(setCurrentConversation(id));
         setTimeout(() => {
             animateScroll.scrollToBottom(options);
         }, 500);
+        
+        return () => {
+            dispatch(setCurrentConversation(null));
+        }
     }, [id]);
 
     const onSubmit = (data) => {
@@ -158,7 +163,7 @@ export default function Chat() {
                     {messages.map((message) => (
                         <div key={message._id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-2`}>
                             <div className={` ${message.role === "user" ? "bg-[#f3f3f3] dark:bg-[#212121] px-4 py-2 rounded-3xl max-w-10/12 sm:max-w-1/2" : ""}`}>
-                                <MarkdownRender content={message.content} role={message.role}/>
+                                <MarkdownRender content={message.content} role={message.role} />
                                 <div className={`mt-2 ${message.role === "user" ? "hidden" : ""}`}>
                                     <ResponseInfo content={message.content} promptTokens={message.promptTokens} completionTokens={message.completionTokens} totalTokens={message.totalTokens} />
                                 </div>
@@ -237,7 +242,6 @@ export default function Chat() {
                                                 <SelectItem key={"minimal"} value={"Minimal"}>
                                                     Minimal
                                                 </SelectItem>
-
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>

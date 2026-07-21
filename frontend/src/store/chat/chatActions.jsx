@@ -6,6 +6,7 @@ import {
     setChatCreating, 
     setCurrentConversation,
     setInitialMessage,
+    deleteConversation,
 } from "./chatSlice";
 
 export const fetchChats = () => async (dispatch, getState) => {
@@ -37,3 +38,14 @@ export const createChat = (chatData) => async (dispatch) => {
         dispatch(setChatCreating(false));
     }
 };
+
+export const deleteChat = (chatId) => async (dispatch) => {
+    try {
+        dispatch(setChatError(null));
+        await axios.delete(`/chat/${chatId}`);
+        dispatch(deleteConversation(chatId));
+        dispatch(setCurrentConversation(null)); // Clear the current conversation if it was deleted
+    } catch (error) {
+        dispatch(setChatError(error.response?.data?.message || "Failed to delete chat"));
+    }
+}

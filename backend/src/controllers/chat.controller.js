@@ -5,6 +5,7 @@ const aiService = require("../services/ai.service")
 const { Pinecone } = require('@pinecone-database/pinecone')
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const crypto = require("crypto")
 
 // Initialize a Pinecone client with your API key
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
