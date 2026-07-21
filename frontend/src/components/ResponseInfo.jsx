@@ -1,6 +1,5 @@
 import { Copy } from "lucide-react";
 import { Button } from "./ui/button"
-import { Marker, MarkerContent } from "./ui/marker";
 import {
     Tooltip,
     TooltipContent,

@@ -3,7 +3,6 @@ import { Search as SearchIcon } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Loader } from "lucide-react"
 
 export default function Search() {
     const [searchQuery, setSearchQuery] = useState("");
