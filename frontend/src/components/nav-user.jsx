@@ -28,11 +28,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { logout } from "@/api/logout";
-import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { clearAccessToken } from "@/store/auth/authSlice";
-import { removeUser } from "@/store/user/userSlice";
-// import { }
+import { removeUser, setShowProfile } from "@/store/user/userSlice";
 import { useNavigate } from "react-router-dom";
 
 export function NavUser({
@@ -95,22 +93,22 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled={true}>
                 <Sparkles />
                 Upgrade to Pro
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => dispatch(setShowProfile(true))}>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled={true}>
                 <CreditCard />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled={true}>
                 <Bell />
                 Notifications
               </DropdownMenuItem>

@@ -54,8 +54,8 @@ export default function Login() {
     }, [isAuthenticated, navigate]);
     return (
         <>
-            <div className="flex flex-col items-center justify-center min-h-screen py-2">
-                <Card className="w-full sm:max-w-md sm:px-4 px-2 py-8">
+            <div className="flex flex-col items-center justify-center min-h-screen p-2 border-2 w-full">
+                <Card className="sm:max-w-sm sm:w-full w-full sm:px-4 px-2 py-8">
                     <CardHeader className="text-center">
                         <CardTitle className="text-2xl font-bold">Login</CardTitle>
                         <CardDescription>

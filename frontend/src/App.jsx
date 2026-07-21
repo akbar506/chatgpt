@@ -1,3 +1,4 @@
+import ShowProfile from "./components/ShowProfile"
 import AppRoutes from "./Routes/routes"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
@@ -7,6 +8,7 @@ function App() {
     <>
       <TooltipProvider>
         <main className="min-h-screen">
+          <ShowProfile />
           <AppRoutes />
         </main>
       </TooltipProvider>

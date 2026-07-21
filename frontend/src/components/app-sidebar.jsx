@@ -30,7 +30,7 @@ export default function AppSidebar({ ...props }) {
       .then(() => setLoading(false))
   }, [])
   return (
-    <Sidebar collapsible="icon" {...props} className="bg-black text-lg" >
+    <Sidebar collapsible="icon" {...props} >
       <SidebarHeader className="border-b p-2 mt-3">
         <div className="flex items-center justify-between">
           <div className="flex h-10 w-10 items-center justify-center rounded-m dark:invert">
@@ -66,7 +66,7 @@ export default function AppSidebar({ ...props }) {
           {loading ? <Loader className="animate-spin mx-auto mt-10" /> : <NavChats chats={conversations} />}
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className={"border-t"}>
         {user && <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>

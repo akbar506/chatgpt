@@ -41,7 +41,7 @@ export default function Home() {
         <>
             <div className="flex flex-col items-center justify-center h-full">
                 <div className="mb-32 w-full max-w-2xl space-y-6">
-                    <h1 className="text-center font-semibold text-xl sm:text-3xl">Get Ready to take off?</h1>
+                    <h1 className="text-center font-semibold text-xl sm:text-2xl">Where should we begin?</h1>
                     <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
 
                         <Controller
@@ -61,9 +61,9 @@ export default function Home() {
                                         />
                                         <Button
                                             type="submit"
-                                            className="rounded-full h-9 absolute bottom-2.5 right-3"
+                                            className="rounded-full h-10 w-10 absolute bottom-2 right-3"
                                         >
-                                            <ArrowUp />
+                                            <ArrowUp size={35} strokeWidth={3} />
                                         </Button>
                                     </div>
                                 </Field>
