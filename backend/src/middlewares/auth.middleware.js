@@ -31,7 +31,6 @@ const authUser = async (req, res, next) => {
 
         next()
     } catch (err) {
-        console.error("Error: ", err)
         res.status(401).json({
             success: false,
             message: "Unauthorized"

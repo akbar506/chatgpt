@@ -7,11 +7,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 
 export default function Home() {
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const dispatch = useDispatch();
@@ -24,13 +25,14 @@ export default function Home() {
     })
 
     const handleKeyDown = (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
+        if (e.key === "Enter" && !e.shiftKey && !loading) {
             e.preventDefault();
             form.handleSubmit(onSubmit)();
         }
     };
 
     const onSubmit = async (data) => {
+        setLoading(true);
         const createdChat = await dispatch(createChat(data));
         if (createdChat?._id) {
             navigate(`/chat/${createdChat._id}`);
@@ -62,8 +64,9 @@ export default function Home() {
                                         <Button
                                             type="submit"
                                             className="rounded-full h-10 w-10 absolute bottom-2 right-3"
+                                            disabled={loading}
                                         >
-                                            <ArrowUp size={35} strokeWidth={3} />
+                                             {loading ? <Loader2 className="animate-spin" size={35} strokeWidth={3} /> : <ArrowUp size={35} strokeWidth={3} />}
                                         </Button>
                                     </div>
                                 </Field>
