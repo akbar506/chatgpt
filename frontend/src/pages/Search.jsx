@@ -8,8 +8,8 @@ import { Loader } from "lucide-react"
 export default function Search() {
     const [searchQuery, setSearchQuery] = useState("");
     const conversations = useSelector((state) => state.chat.conversations)
-    
-    return conversations.length > 0 ?(
+
+    return (
         <>
             <div className="flex flex-col items-center h-full mt-20">
                 <div className="mb-32 w-full max-w-xl space-y-6">
@@ -41,5 +41,5 @@ export default function Search() {
             </div>
 
         </>
-    ): <><Loader className="animate-spin" /></>
+    )
 }

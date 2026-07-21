@@ -9,6 +9,8 @@ const ShareChat = lazy(() => import("@/pages/Share"));
 const AppLayout = lazy(() => import("@/layouts/AppLayout"));
 const AuthLayout = lazy(() => import("@/layouts/AuthLayout"));
 const UnAuthLayout = lazy(() => import("@/layouts/UnAuthLayout"));
+const ProtectedRoute = lazy(() => import("@/Routes/ProtectedRoute"));
+const PublicRoute = lazy(() => import("@/Routes/PublicRoute"));
 import { Routes, Route } from "react-router-dom";
 
 export default function AppRoutes() {
@@ -16,9 +18,11 @@ export default function AppRoutes() {
         <Routes>
 
             {/* Auth Pages */}
-            <Route element={<AuthLayout />}>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+            <Route element={<PublicRoute />}>
+                <Route element={<AuthLayout />}>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                </Route>
             </Route>
 
             {/* Unauth Pages */}
@@ -27,10 +31,12 @@ export default function AppRoutes() {
             </Route >
 
             {/* Dashboard Pages */}
-            <Route element={<AppLayout />}>
-                <Route path="/" element={<Home />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/chat/:id" element={<Chat />} />
+            <Route element={<ProtectedRoute />}>
+                <Route element={<AppLayout />}>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="/chat/:id" element={<Chat />} />
+                </Route>
             </Route>
 
         </Routes>
