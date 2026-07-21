@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowUp, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 
 export default function Home() {
+    usePageTitle("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 

@@ -3,8 +3,10 @@ import { Search as SearchIcon } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function Search() {
+    usePageTitle("Search");
     const [searchQuery, setSearchQuery] = useState("");
     const conversations = useSelector((state) => state.chat.conversations)
 

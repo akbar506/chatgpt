@@ -26,8 +26,10 @@ import { getMessages } from "@/api/getMessages";
 import MarkdownRender from "@/components/MarkdownRender";
 import { animateScroll } from 'react-scroll';
 import { socketClient } from "@/socket/socket";
+import { toast } from "@/components/CustomSonner";
 import { setInitialMessage, setCurrentConversation } from "@/store/chat/chatSlice";
 import { nanoid } from 'nanoid'
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function Chat() {
 
@@ -35,11 +37,13 @@ export default function Chat() {
     const dispatch = useDispatch();
     const [messages, setMessages] = useState([]);
     const [chunkedResponse, setChunkedResponse] = useState("");
-    const [error, setError] = useState(null);
     const [generating, setGenerating] = useState(false);
     const [isMessageLoading, setIsMessageLoading] = useState(false);
-    const { initialMessage } = useSelector((state) => state.chat);
+    const { initialMessage, conversations } = useSelector((state) => state.chat);
     const { accessToken } = useSelector((state) => state.auth);
+    const chatTitle = conversations.find((conversation) => conversation._id === id)?.title;
+
+    usePageTitle(chatTitle || "Chat");
 
     const form = useForm({
         resolver: zodResolver(messageSchema),
@@ -94,7 +98,7 @@ export default function Chat() {
         setTimeout(() => {
             animateScroll.scrollToBottom(options);
         }, 500);
-        
+
         return () => {
             dispatch(setCurrentConversation(null));
         }
@@ -137,7 +141,11 @@ export default function Chat() {
                     socket.disconnect();
                 });
                 socket.on("ai-response-error", (error) => {
-                    setError(error);
+                    toast({
+                        title: error.title || 'Failed to generate response',
+                        description: 'An error occurred while trying to generate the response. Please try again later.',
+                        type: "error",
+                    });
                     socket.disconnect();
                     setGenerating(false);
                 });

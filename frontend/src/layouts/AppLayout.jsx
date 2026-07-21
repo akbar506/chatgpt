@@ -42,6 +42,7 @@ export default function AppLayout() {
       toast({
         title: 'Failed to delete chat',
         description: 'An error occurred while trying to delete the chat. Please try again later.',
+        type: "error",
       });
     }
   }

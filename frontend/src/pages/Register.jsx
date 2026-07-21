@@ -29,8 +29,10 @@ import { useDispatch, useSelector } from "react-redux"
 import { registerUser } from "@/store/auth/authActions"
 import { AlertCircleIcon, Loader } from "lucide-react"
 import { useState, useEffect } from "react"
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function Register() {
+    usePageTitle("Create account");
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();

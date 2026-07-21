@@ -25,8 +25,10 @@ import { useNavigate } from "react-router-dom"
 import { loginUser } from "@/store/auth/authActions"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircleIcon } from "lucide-react"
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function Login() {
+    usePageTitle("Log in");
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();

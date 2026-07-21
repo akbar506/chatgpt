@@ -9,11 +9,14 @@ import MarkdownRender from "@/components/MarkdownRender"
 import ResponseInfo from "@/components/ResponseInfo"
 import Linkedin from "@/components/icon/linkedin"
 import { GithubDark, GithubLight } from "@/components/icon/github"
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function ShareChat() {
     const { shareToken } = useParams()
     const [chatData, setChatData] = useState(null)
     const [loading, setLoading] = useState(true)
+
+    usePageTitle(chatData?.chat?.title || "Shared chat");
 
     useEffect(() => {
         // Fetch the shared chat data using the shareToken
