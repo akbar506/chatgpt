@@ -23,9 +23,10 @@ import { useDispatch, useSelector } from "react-redux"
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { loginUser } from "@/store/auth/authActions"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircleIcon } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircleIcon, Loader } from "lucide-react"
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { resetAuthError } from "@/store/auth/authSlice"
 
 export default function Login() {
     usePageTitle("Log in");
@@ -43,15 +44,23 @@ export default function Login() {
         }
     })
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         setLoading(true);
-        dispatch(loginUser(data)); // send the data to login function
-        setLoading(false);
-    }
+        dispatch(resetAuthError())
+        try {
+            await dispatch(loginUser(data));
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (isAuthenticated) {
             navigate("/");
+        }
+        
+        return () => {
+            dispatch(resetAuthError());
         }
     }, [isAuthenticated, navigate]);
     return (

@@ -10,7 +10,6 @@ export const refreshAccessToken = async () => {
         )
         return response.data;
     } catch (error) {
-        console.error("Error refreshing access token:", error);
         throw error;
     }
 }

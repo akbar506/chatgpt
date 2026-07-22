@@ -30,6 +30,7 @@ import { registerUser } from "@/store/auth/authActions"
 import { AlertCircleIcon, Loader } from "lucide-react"
 import { useState, useEffect } from "react"
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { resetAuthError } from "@/store/auth/authSlice"
 
 export default function Register() {
     usePageTitle("Create account");
@@ -49,18 +50,26 @@ export default function Register() {
         }
     })
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         setLoading(true);
-        dispatch(registerUser(data));
-        setLoading(false);
+        dispatch(resetAuthError())
+        try {
+            dispatch(registerUser(data));
+        } finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {
         if (isAuthenticated) {
             navigate("/");
         }
+
+        return () => {
+            dispatch(resetAuthError());
+        }
     }, [isAuthenticated, navigate]);
-    
+
     return (
         <>
             <div className="flex flex-col items-center justify-center min-h-screen p-2 border-2 w-full ">
