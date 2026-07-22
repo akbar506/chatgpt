@@ -54,7 +54,7 @@ export default function Register() {
         setLoading(true);
         dispatch(resetAuthError())
         try {
-            dispatch(registerUser(data));
+            await dispatch(registerUser(data));
         } finally {
             setLoading(false);
         }
