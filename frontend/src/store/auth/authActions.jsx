@@ -5,7 +5,7 @@ import { setAccessToken, setAuthError, resetAuthError } from "@/store/auth/authS
 export const registerUser = (userData) => async (dispatch, getState) => {
     try {
         dispatch(resetAuthError());
-        const response = await axios.post("/auth/register", userData);
+        const response = await axios.post("/auth/register", userData, { withCredentials: true });
         const { message, accessToken, user } = response.data;
         dispatch(setAccessToken(accessToken));
         dispatch(loadUser(user));
@@ -19,7 +19,7 @@ export const registerUser = (userData) => async (dispatch, getState) => {
 export const loginUser = (userData) => async (dispatch, getState) => {
     try {
         dispatch(resetAuthError());
-        const response = await axios.post("/auth/login", userData);
+        const response = await axios.post("/auth/login", userData, { withCredentials: true });
         const { message, accessToken, user } = response.data;
         dispatch(setAccessToken(accessToken));
         dispatch(loadUser(user));
