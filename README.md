@@ -4,9 +4,9 @@ A full-stack AI chat application with authenticated conversations, real-time str
 
 ## Screenshot
 
-> Placeholder — replace this image with an application screenshot.
+> ChatGPT Clone - Project Demo.
 
-![ChatGPT Clone screenshot placeholder](https://placehold.co/1200x675/18181b/ffffff?text=ChatGPT+Clone+Screenshot)
+![ChatGPT Clone Demo](/frontend/public/project-demo.gif)
 
 ## Features
 
