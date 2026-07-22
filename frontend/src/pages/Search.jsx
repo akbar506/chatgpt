@@ -25,6 +25,7 @@ export default function Search() {
                             autoComplete="off"
                         />
                     </div>
+                    {/* Filter out the conversation which includes the characters of user input */}
                     <div className="flex flex-col gap-4">
                         <p className="text-lg font-semibold ml-2 text-muted-foreground">Recent</p>
                         {conversations.filter((conversation) =>

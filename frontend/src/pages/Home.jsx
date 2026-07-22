@@ -26,6 +26,7 @@ export default function Home() {
         }
     })
 
+    // Handle Enter key press to submit the form
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey && !loading) {
             e.preventDefault();
@@ -33,11 +34,12 @@ export default function Home() {
         }
     };
 
+    // Send the user prompt to backend
     const onSubmit = async (data) => {
         setLoading(true);
         const createdChat = await dispatch(createChat(data));
         if (createdChat?._id) {
-            navigate(`/chat/${createdChat._id}`);
+            navigate(`/chat/${createdChat._id}`); // If chat is created then navigate to `/chat/chatId`
         }
         form.reset();
     }
@@ -47,7 +49,6 @@ export default function Home() {
                 <div className="mb-32 w-full max-w-2xl space-y-6">
                     <h1 className="text-center font-semibold text-xl sm:text-2xl">Where should we begin?</h1>
                     <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
-
                         <Controller
                             name="prompt"
                             control={form.control}

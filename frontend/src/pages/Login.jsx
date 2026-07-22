@@ -45,7 +45,7 @@ export default function Login() {
 
     const onSubmit = (data) => {
         setLoading(true);
-        dispatch(loginUser(data));
+        dispatch(loginUser(data)); // send the data to login function
         setLoading(false);
     }
 

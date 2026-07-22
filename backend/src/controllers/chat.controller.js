@@ -186,7 +186,7 @@ async function getSharedChat(req, res) {
         if (!chat || !chat.shared) {
             return res.status(404).json({
                 success: false,
-                message: "Shared chat not found"
+                message: "Shared chat not found. Chat has been deleted or link is invalid."
             })
         }
 

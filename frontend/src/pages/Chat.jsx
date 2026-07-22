@@ -2,6 +2,7 @@ import { useSelector } from "react-redux"
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ArrowUp, Loader, Loader2 } from "lucide-react";
@@ -35,6 +36,7 @@ export default function Chat() {
 
     const { id } = useParams();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [chunkedResponse, setChunkedResponse] = useState("");
     const [generating, setGenerating] = useState(false);
@@ -54,11 +56,13 @@ export default function Chat() {
         }
     });
 
+    // Scroll options for react-scroll
     const options = {
         duration: 500,
         smooth: true,
     };
 
+    // Handle Enter key press to submit the form
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -66,6 +70,7 @@ export default function Chat() {
         }
     };
 
+    // If there's an initial message, submit it after a short delay
     useEffect(() => {
         if (initialMessage) {
             const data = {
@@ -81,25 +86,36 @@ export default function Chat() {
         }
     }, [id, initialMessage, dispatch]);
 
+    // Fetch messages for the current conversation when the component mounts or when the conversation ID changes
     useEffect(() => {
         const fetchMessages = async () => {
             try {
                 setIsMessageLoading(true);
                 const messages = await getMessages(id);
                 setMessages(messages.messages || []);
+
             } catch (error) {
-                console.error("Error fetching messages:", error);
+                toast({
+                    title: 'Error fetching messages',
+                    description: error.message || 'An error occurred while trying to fetch messages. Please try again later.',
+                    type: "error",
+                });
+                navigate("/");
             } finally {
                 setIsMessageLoading(false);
             }
         };
         fetchMessages();
+        // Save the current conversation id in chat slice (store)
         dispatch(setCurrentConversation(id));
         setTimeout(() => {
+            // After 500 ms, it will scroll down the page to bottom
+            // Why animate after 500 ms? Because content in component not fully render immediately.
             animateScroll.scrollToBottom(options);
         }, 500);
 
         return () => {
+            // When the component unmount, then set the current conversation to null
             dispatch(setCurrentConversation(null));
         }
     }, [id]);
@@ -108,6 +124,7 @@ export default function Chat() {
         setGenerating(true);
         try {
             if (accessToken) {
+                // If access token exists, connect to server
                 const socket = socketClient(accessToken);
                 socket.connect();
 
@@ -122,16 +139,19 @@ export default function Chat() {
                 }
                 socket.emit("ai-message", messagePayload);
 
+                // save the new user prompt to messages
                 setMessages((prevMessages) => [...prevMessages, { _id: nanoid(), role: "user", content: messagePayload.content }]);
 
-                animateScroll.scrollToBottom(options);
+                animateScroll.scrollToBottom(options); // Scroll down to bottom
 
+                // If user turn on the streaming response, then it receives the chunks from server
                 if (messagePayload.stream) {
                     socket.on("ai-chunk", (chunk) => {
-                        setChunkedResponse((prev) => prev + chunk.content);
-                        animateScroll.scrollToBottom(options);
+                        setChunkedResponse((prev) => prev + chunk.content); // Temporary save chunks to chunk state 
+                        animateScroll.scrollToBottom(options); // After each receive, it scroll down
                     })
                 }
+                // It receive full response from the server with response detail
                 socket.on("ai-response", (response) => {
                     setMessages((prevMessages) => [...prevMessages, { _id: nanoid(), ...response }]);
                     setChunkedResponse("");
@@ -140,6 +160,7 @@ export default function Chat() {
                     animateScroll.scrollToBottom(options);
                     socket.disconnect();
                 });
+                // If any error occured, "ai-response-error" event will receive the error message and display on screen.
                 socket.on("ai-response-error", (error) => {
                     toast({
                         title: error.title || 'Failed to generate response',
@@ -151,7 +172,6 @@ export default function Chat() {
                 });
             }
         } catch (error) {
-            console.error("Error connecting to WebSocket:", error);
             setGenerating(false);
         }
     }
@@ -168,6 +188,7 @@ export default function Chat() {
         <>
             <div className="flex flex-col items-center h-full">
                 <div className="p-2 w-full max-w-3xl pb-32">
+                    {/* Render all the messges. If role is user then message is placed on right side with background color and if role is model then it is placed on left side with no background color but with response detail. */}
                     {messages.map((message) => (
                         <div key={message._id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-2`}>
                             <div className={` ${message.role === "user" ? "bg-[#f3f3f3] dark:bg-[#212121] px-4 py-2 rounded-3xl max-w-10/12 sm:max-w-1/2" : ""}`}>
@@ -178,6 +199,7 @@ export default function Chat() {
                             </div>
                         </div>
                     ))}
+                    {/* It will start displayed when user submit prompt, from that time to the first token will be received. */}
                     {generating && (<div className="min-h-96">
                         {generating && !chunkedResponse && (
                             <Marker role="status">
@@ -187,6 +209,7 @@ export default function Chat() {
                                 <MarkerContent className="shimmer">Thinking...</MarkerContent>
                             </Marker>
                         )}
+                        {/* It will only be display during AI response Text Streaming */}
                         {generating && chunkedResponse && (
                             <div className="flex justify-start mb-2">
                                 <div className="rounded-lg">
@@ -197,6 +220,7 @@ export default function Chat() {
                         )}
                     </div>)}
                 </div>
+                {/* User Input */}
                 <div className="p-2 w-full max-w-3xl bottom-4 space-y-3 fixed">
                     <p className="text-xs select-none text-muted-foreground text-center">ChatGPT Clone can make mistakes. Check important info</p>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 bg-white rounded-4xl border-2 px-3 py-2 relative dark:bg-[#212121]">

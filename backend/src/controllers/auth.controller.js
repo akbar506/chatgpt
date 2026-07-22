@@ -30,7 +30,7 @@ const registerUser = async (req, res) => {
 
         await newUser.save()
         
-        res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 }) // 7 days
+        res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: "None", secure: true }) // 7 days
 
         res.status(201).json({ 
             success: true,
@@ -70,7 +70,8 @@ const loginUser = async (req, res) => {
         const refreshToken = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         const accessToken = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET, { expiresIn: "10m" });
 
-        res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 }) // 7 days
+        // Set the refresh token in an HTTP-only cookie and enable SameSite=None and Secure attributes for cross-site requests
+        res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: "None", secure: true }) // 7 days
 
         res.status(200).json({
             message: "User logged in successfully",

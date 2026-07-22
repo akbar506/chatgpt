@@ -11,6 +11,7 @@ const AuthLayout = lazy(() => import("@/layouts/AuthLayout"));
 const UnAuthLayout = lazy(() => import("@/layouts/UnAuthLayout"));
 const ProtectedRoute = lazy(() => import("@/Routes/ProtectedRoute"));
 const PublicRoute = lazy(() => import("@/Routes/PublicRoute"));
+const NotFound = lazy(() => import("@/pages/NotFound"))
 import { Routes, Route } from "react-router-dom";
 
 export default function AppRoutes() {
@@ -38,7 +39,8 @@ export default function AppRoutes() {
                     <Route path="/chat/:id" element={<Chat />} />
                 </Route>
             </Route>
-
+            {/* Not Found Page */}
+            <Route path="*" element={<NotFound />} />
         </Routes>
     )
 }
