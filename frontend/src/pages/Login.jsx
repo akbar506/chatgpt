@@ -98,6 +98,7 @@ export default function Login() {
                                                 placeholder="akber@ali.com"
                                                 autoComplete="off"
                                                 className="h-9"
+                                                type="email"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />

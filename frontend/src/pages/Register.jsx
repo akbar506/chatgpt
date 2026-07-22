@@ -105,6 +105,7 @@ export default function Register() {
                                                 placeholder="Akber"
                                                 autoComplete="off"
                                                 className="h-9"
+                                                type="text"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />
@@ -127,6 +128,7 @@ export default function Register() {
                                                 placeholder="Ali"
                                                 autoComplete="off"
                                                 className="h-9"
+                                                type="text"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />
@@ -149,6 +151,7 @@ export default function Register() {
                                                 placeholder="akber@ali.com"
                                                 autoComplete="off"
                                                 className="h-9"
+                                                type="email"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />
